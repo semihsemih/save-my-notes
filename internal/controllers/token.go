@@ -3,8 +3,8 @@ package controllers
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
-	"github.com/semihsemih/save-my-notes/utils"
 	"net/http"
 	"os"
 	"strings"

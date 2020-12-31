@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/semihsemih/save-my-notes/controllers"
-	"github.com/semihsemih/save-my-notes/driver"
+	"github.com/semihsemih/save-my-notes/internal/controllers"
+	"github.com/semihsemih/save-my-notes/internal/driver"
 	"gorm.io/gorm"
 )
 

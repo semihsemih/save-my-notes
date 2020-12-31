@@ -3,8 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
-	"github.com/semihsemih/save-my-notes/utils"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"

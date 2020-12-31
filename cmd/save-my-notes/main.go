@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/semihsemih/save-my-notes/router"
+	"github.com/semihsemih/save-my-notes/internal/router"
 	"github.com/subosito/gotenv"
 	"log"
 	"net/http"
