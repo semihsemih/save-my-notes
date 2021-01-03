@@ -28,8 +28,7 @@ func GenerateToken(user models.User) (string, error) {
 	secret := os.Getenv("TOKEN_SECRET")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-		"email": user.Email,
+		"uuid": user.UUID,
 		"iss":   os.Getenv("APP_NAME"),
 		"exp":   time.Now().Add(time.Hour * 2).Unix(),
 	})

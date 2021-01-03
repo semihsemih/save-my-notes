@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 	"github.com/semihsemih/save-my-notes/internal/services"
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
@@ -41,6 +42,7 @@ func (c *Controller) Signup() http.HandlerFunc {
 		}
 
 		user.Password = string(hash)
+		user.UUID = uuid.NewV4()
 
 		if result := c.DB.Create(&user); result.Error != nil {
 			error.Message = result.Error.Error()
