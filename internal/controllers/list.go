@@ -7,14 +7,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func (c Controller) InsertList(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) InsertList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var list models.List
 		var errorObject models.Error
@@ -59,7 +58,7 @@ func (c Controller) InsertList(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		if result := db.Create(&list); result.Error != nil {
+		if result := c.DB.Create(&list); result.Error != nil {
 			errorObject.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
 			return
@@ -70,7 +69,7 @@ func (c Controller) InsertList(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) GetList(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) GetList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var list models.List
 		var error models.Error
@@ -83,12 +82,12 @@ func (c Controller) GetList(db *gorm.DB) http.HandlerFunc {
 		}
 		list.ID = uint(id)
 
-		if result := db.Where("id = ?", list.ID).First(&list); result.Error != nil {
+		if result := c.DB.Where("id = ?", list.ID).First(&list); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}
-		err = db.Model(&list).Association("Notes").Find(&list.Notes)
+		err = c.DB.Model(&list).Association("Notes").Find(&list.Notes)
 		if err != nil {
 			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
@@ -100,7 +99,7 @@ func (c Controller) GetList(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) UpdateList(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) UpdateList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var list models.List
 		var error models.Error
@@ -126,7 +125,7 @@ func (c Controller) UpdateList(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		if result := db.Model(&list).Updates(models.List{Title: list.Title, Description: list.Description}); result.Error != nil {
+		if result := c.DB.Model(&list).Updates(models.List{Title: list.Title, Description: list.Description}); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
@@ -137,13 +136,13 @@ func (c Controller) UpdateList(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) DeleteList(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) DeleteList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var error models.Error
 		vars := mux.Vars(r)
 		id := vars["id"]
 
-		if result := db.Unscoped().Delete(&models.List{}, id); result.Error != nil {
+		if result := c.DB.Unscoped().Delete(&models.List{}, id); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return

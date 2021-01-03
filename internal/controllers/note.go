@@ -5,12 +5,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
 
-func (c Controller) InsertNote(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) InsertNote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var note models.Note
 		var error models.Error
@@ -28,7 +27,7 @@ func (c Controller) InsertNote(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		if result := db.Create(&note); result.Error != nil {
+		if result := c.DB.Create(&note); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
@@ -39,7 +38,7 @@ func (c Controller) InsertNote(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) GetNote(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) GetNote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var note models.Note
 		var error models.Error
@@ -52,7 +51,7 @@ func (c Controller) GetNote(db *gorm.DB) http.HandlerFunc {
 		}
 		note.ID = uint(id)
 
-		if result := db.Where("id = ?", note.ID).First(&note); result.Error != nil {
+		if result := c.DB.Where("id = ?", note.ID).First(&note); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
@@ -63,7 +62,7 @@ func (c Controller) GetNote(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) UpdateNote(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) UpdateNote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var note models.Note
 		var error models.Error
@@ -89,7 +88,7 @@ func (c Controller) UpdateNote(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		if result := db.Model(&note).Updates(models.Note{Title: note.Title, Content: note.Content}); result.Error != nil {
+		if result := c.DB.Model(&note).Updates(models.Note{Title: note.Title, Content: note.Content}); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
@@ -100,13 +99,13 @@ func (c Controller) UpdateNote(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) DeleteNote(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) DeleteNote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var error models.Error
 		vars := mux.Vars(r)
 		id := vars["id"]
 
-		if result := db.Unscoped().Delete(&models.Note{}, id); result.Error != nil {
+		if result := c.DB.Unscoped().Delete(&models.Note{}, id); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return

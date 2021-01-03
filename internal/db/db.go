@@ -1,26 +1,25 @@
 package db
 
 import (
-	"database/sql"
-	"github.com/lib/pq"
+	"fmt"
+	"github.com/semihsemih/save-my-notes/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"os"
 )
 
-var db *sql.DB
+var db *gorm.DB
 
-func Init() *sql.DB {
-	pgUrl, err := pq.ParseURL(os.Getenv("SQL_URL"))
+func ConnectDB() *gorm.DB {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err = sql.Open("postgres", pgUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.Ping()
+	err = db.AutoMigrate(&models.User{}, &models.List{}, &models.Note{})
 	if err != nil {
 		log.Fatal(err)
 	}

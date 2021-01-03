@@ -10,7 +10,6 @@ import (
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +17,7 @@ import (
 	"time"
 )
 
-func (c Controller) Signup(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) Signup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
 		var error models.Error
@@ -43,7 +42,7 @@ func (c Controller) Signup(db *gorm.DB) http.HandlerFunc {
 
 		user.Password = string(hash)
 
-		if result := db.Create(&user); result.Error != nil {
+		if result := c.DB.Create(&user); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
@@ -57,7 +56,7 @@ func (c Controller) Signup(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) Login(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
 		var jwt models.JWT
@@ -77,7 +76,7 @@ func (c Controller) Login(db *gorm.DB) http.HandlerFunc {
 		}
 
 		password := user.Password
-		if result := db.Where("email = ?", user.Email).First(&user); result.Error != nil {
+		if result := c.DB.Where("email = ?", user.Email).First(&user); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
@@ -103,7 +102,7 @@ func (c Controller) Login(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) AccountActivation(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) AccountActivation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var errorObject models.Error
 		vars := mux.Vars(r)
@@ -126,7 +125,7 @@ func (c Controller) AccountActivation(db *gorm.DB) http.HandlerFunc {
 			email = fmt.Sprintf("%v", claims["email"])
 		}
 
-		if result := db.Exec("UPDATE users SET status = @status, updated_at = @updated_at WHERE email = @email",
+		if result := c.DB.Exec("UPDATE users SET status = @status, updated_at = @updated_at WHERE email = @email",
 			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("email", email)); result.Error != nil {
 			errorObject.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
@@ -138,7 +137,7 @@ func (c Controller) AccountActivation(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func (c Controller) GetUser(db *gorm.DB) http.HandlerFunc {
+func (c *Controller) GetUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
 		var error models.Error
@@ -151,12 +150,12 @@ func (c Controller) GetUser(db *gorm.DB) http.HandlerFunc {
 		}
 		user.ID = uint(id)
 
-		if result := db.Where("id = ?", user.ID).First(&user); result.Error != nil {
+		if result := c.DB.Where("id = ?", user.ID).First(&user); result.Error != nil {
 			error.Message = result.Error.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}
-		err = db.Model(&user).Association("Lists").Find(&user.Lists)
+		err = c.DB.Model(&user).Association("Lists").Find(&user.Lists)
 		if err != nil {
 			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
