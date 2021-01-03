@@ -109,7 +109,7 @@ func (c *Controller) AccountActivation() http.HandlerFunc {
 		var errorObject models.Error
 		vars := mux.Vars(r)
 		activationToken := vars["token"]
-		var email string
+		var uuid string
 		token, err := jwt.Parse(activationToken, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("There was an error")
@@ -124,11 +124,11 @@ func (c *Controller) AccountActivation() http.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			email = fmt.Sprintf("%v", claims["email"])
+			uuid = fmt.Sprintf("%v", claims["uuid"])
 		}
 
-		if result := c.DB.Exec("UPDATE users SET status = @status, updated_at = @updated_at WHERE email = @email",
-			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("email", email)); result.Error != nil {
+		if result := c.DB.Exec("UPDATE users SET status = @status, updated_at = @updated_at WHERE uuid = @uuid",
+			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("uuid", uuid)); result.Error != nil {
 			errorObject.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
 			return

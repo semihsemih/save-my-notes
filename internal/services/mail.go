@@ -34,7 +34,7 @@ func SendAccountActivationEmail(mailTo []string, activationToken string) {
 	t.Execute(&body, struct {
 		Address string
 	}{
-		Address: os.Getenv("APP_URL") + "/user/activation/" + activationToken,
+		Address: os.Getenv("APP_URL") + "/api/user/activation/" + activationToken,
 	})
 
 	// Sending email.
@@ -43,5 +43,4 @@ func SendAccountActivationEmail(mailTo []string, activationToken string) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Email Sent!")
 }
