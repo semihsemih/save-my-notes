@@ -16,6 +16,7 @@ import (
 func (c *Controller) InsertList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var list models.List
+		var user models.User
 		var errorObject models.Error
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
@@ -34,14 +35,14 @@ func (c *Controller) InsertList() http.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			fmt.Println(claims)
-			id, err := strconv.ParseUint(fmt.Sprintf("%v", claims["id"]), 10, 64)
-			if err != nil {
-				errorObject.Message = err.Error()
+			uuid := fmt.Sprintf("%v", claims["uuid"])
+			if err := c.DB.Where("uuid = ?", uuid).First(&user); err.Error != nil {
+				errorObject.Message = err.Error.Error()
 				utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
 				return
 			}
-			list.UserID = uint(id)
+
+			list.UserID = user.ID
 		}
 
 		json.NewDecoder(r.Body).Decode(&list)
