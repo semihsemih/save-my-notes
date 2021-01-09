@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Note struct {
 	gorm.Model
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title   string `json:"title" validate:"required"`
+	Content string `json:"content" validate:"required"`
 	ListID  uint   `json:"list_id"`
 }

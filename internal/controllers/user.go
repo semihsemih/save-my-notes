@@ -23,15 +23,9 @@ func (c *Controller) Signup() http.HandlerFunc {
 		var user models.User
 		var error models.Error
 		json.NewDecoder(r.Body).Decode(&user)
-
-		if user.Email == "" {
-			error.Message = "Email is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
-			return
-		}
-
-		if user.Password == "" {
-			error.Message = "Password is missing."
+		err := c.Validator.Struct(user)
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
@@ -65,14 +59,9 @@ func (c *Controller) Login() http.HandlerFunc {
 		var error models.Error
 
 		json.NewDecoder(r.Body).Decode(&user)
-		if user.Email == "" {
-			error.Message = "Email is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
-			return
-		}
-
-		if user.Password == "" {
-			error.Message = "Password is missing."
+		err := c.Validator.Struct(user)
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
@@ -85,7 +74,7 @@ func (c *Controller) Login() http.HandlerFunc {
 		}
 
 		hashedPassword := user.Password
-		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 		if err != nil {
 			error.Message = "Invalid Password"
 			utils.RespondWithError(w, http.StatusUnauthorized, error)

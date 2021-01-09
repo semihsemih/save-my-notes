@@ -15,14 +15,9 @@ func (c *Controller) InsertNote() http.HandlerFunc {
 		var error models.Error
 		json.NewDecoder(r.Body).Decode(&note)
 
-		if note.Title == "" {
-			error.Message = "Title is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
-			return
-		}
-
-		if note.Content == "" {
-			error.Message = "Content is missing."
+		err := c.Validator.Struct(note)
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
@@ -74,14 +69,9 @@ func (c *Controller) UpdateNote() http.HandlerFunc {
 		note.ID = uint(id)
 		json.NewDecoder(r.Body).Decode(&note)
 
-		if note.Title == "" {
-			error.Message = "Title is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
-			return
-		}
-
-		if note.Content == "" {
-			error.Message = "Content is missing."
+		err = c.Validator.Struct(note)
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}

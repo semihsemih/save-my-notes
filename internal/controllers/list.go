@@ -47,14 +47,9 @@ func (c *Controller) InsertList() http.HandlerFunc {
 
 		json.NewDecoder(r.Body).Decode(&list)
 
-		if list.Title == "" {
-			errorObject.Message = "Title is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, errorObject)
-			return
-		}
-
-		if list.Description == "" {
-			errorObject.Message = "Description is missing."
+		err = c.Validator.Struct(list)
+		if err != nil {
+			errorObject.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, errorObject)
 			return
 		}
@@ -112,14 +107,9 @@ func (c *Controller) UpdateList() http.HandlerFunc {
 		list.ID = uint(id)
 		json.NewDecoder(r.Body).Decode(&list)
 
-		if list.Title == "" {
-			error.Message = "Title is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
-			return
-		}
-
-		if list.Description == "" {
-			error.Message = "Description is missing."
+		err = c.Validator.Struct(list)
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
