@@ -17,10 +17,12 @@ func RespondWithError(w http.ResponseWriter, status int, err models.Error) {
 	json.NewEncoder(w).Encode(err)
 }
 
-func ResponseJSON(w http.ResponseWriter, data interface{}) {
+func ResponseJSON(w http.ResponseWriter, status int, data interface{}) {
+	response, _ := json.Marshal(data)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	json.NewEncoder(w).Encode(data)
+	w.WriteHeader(status)
+	w.Write(response)
 }
 
 func GenerateToken(user models.User) (string, error) {

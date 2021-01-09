@@ -33,8 +33,7 @@ func (c *Controller) InsertNote() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusCreated)
-		utils.ResponseJSON(w, note)
+		utils.ResponseJSON(w, http.StatusCreated, note)
 	}
 }
 
@@ -57,8 +56,7 @@ func (c *Controller) GetNote() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, note)
+		utils.ResponseJSON(w, http.StatusOK, note)
 	}
 }
 
@@ -94,8 +92,7 @@ func (c *Controller) UpdateNote() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, "Note Updated!")
+		utils.ResponseJSON(w, http.StatusOK, "Note Updated!")
 	}
 }
 
@@ -111,7 +108,6 @@ func (c *Controller) DeleteNote() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, "Note Removed!")
+		utils.ResponseJSON(w, http.StatusOK, "Note Removed!")
 	}
 }

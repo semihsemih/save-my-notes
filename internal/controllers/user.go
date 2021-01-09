@@ -54,7 +54,7 @@ func (c *Controller) Signup() http.HandlerFunc {
 		go services.SendAccountActivationEmail([]string{user.Email}, activationToken)
 
 		user.Password = ""
-		utils.ResponseJSON(w, user)
+		utils.ResponseJSON(w, http.StatusCreated, user)
 	}
 }
 
@@ -97,10 +97,9 @@ func (c *Controller) Login() http.HandlerFunc {
 			log.Fatal(err)
 		}
 
-		w.WriteHeader(http.StatusOK)
 		jwt.Token = token
 
-		utils.ResponseJSON(w, jwt)
+		utils.ResponseJSON(w, http.StatusOK, jwt)
 	}
 }
 
@@ -134,8 +133,7 @@ func (c *Controller) AccountActivation() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, "Account activated")
+		utils.ResponseJSON(w, http.StatusOK, "Account activated")
 	}
 }
 
@@ -164,7 +162,6 @@ func (c *Controller) GetUser() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, user)
+		utils.ResponseJSON(w, http.StatusOK, user)
 	}
 }

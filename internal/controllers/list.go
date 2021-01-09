@@ -65,8 +65,7 @@ func (c *Controller) InsertList() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusCreated)
-		utils.ResponseJSON(w, list)
+		utils.ResponseJSON(w, http.StatusCreated, list)
 	}
 }
 
@@ -95,8 +94,7 @@ func (c *Controller) GetList() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, list)
+		utils.ResponseJSON(w, http.StatusOK, list)
 	}
 }
 
@@ -132,8 +130,7 @@ func (c *Controller) UpdateList() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, "List Updated!")
+		utils.ResponseJSON(w, http.StatusOK, "List Updated!")
 	}
 }
 
@@ -149,7 +146,6 @@ func (c *Controller) DeleteList() http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		utils.ResponseJSON(w, "List Removed!")
+		utils.ResponseJSON(w, http.StatusOK, "List Removed!")
 	}
 }
