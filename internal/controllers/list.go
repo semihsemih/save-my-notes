@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
@@ -47,9 +48,14 @@ func (c *Controller) InsertList() http.HandlerFunc {
 
 		json.NewDecoder(r.Body).Decode(&list)
 
-		err = c.Validator.Struct(list)
+		validate := validator.New()
+		err = validate.Struct(list)
 		if err != nil {
-			errorObject.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				errorObject.Errors = append(errorObject.Errors, fmt.Sprintf("%v", validationError))
+			}
+			errorObject.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, errorObject)
 			return
 		}
@@ -107,9 +113,14 @@ func (c *Controller) UpdateList() http.HandlerFunc {
 		list.ID = uint(id)
 		json.NewDecoder(r.Body).Decode(&list)
 
-		err = c.Validator.Struct(list)
+		validate := validator.New()
+		err = validate.Struct(list)
 		if err != nil {
-			error.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				error.Errors = append(error.Errors, fmt.Sprintf("%v", validationError))
+			}
+			error.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}

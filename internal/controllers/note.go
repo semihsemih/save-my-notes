@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/semihsemih/save-my-notes/internal/utils"
 	"github.com/semihsemih/save-my-notes/models"
@@ -15,9 +17,14 @@ func (c *Controller) InsertNote() http.HandlerFunc {
 		var error models.Error
 		json.NewDecoder(r.Body).Decode(&note)
 
-		err := c.Validator.Struct(note)
+		validate := validator.New()
+		err := validate.Struct(note)
 		if err != nil {
-			error.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				error.Errors = append(error.Errors, fmt.Sprintf("%v", validationError))
+			}
+			error.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
@@ -69,9 +76,14 @@ func (c *Controller) UpdateNote() http.HandlerFunc {
 		note.ID = uint(id)
 		json.NewDecoder(r.Body).Decode(&note)
 
-		err = c.Validator.Struct(note)
+		validate := validator.New()
+		err = validate.Struct(note)
 		if err != nil {
-			error.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				error.Errors = append(error.Errors, fmt.Sprintf("%v", validationError))
+			}
+			error.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}

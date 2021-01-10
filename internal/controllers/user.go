@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"github.com/semihsemih/save-my-notes/internal/services"
@@ -23,9 +24,14 @@ func (c *Controller) Signup() http.HandlerFunc {
 		var user models.User
 		var error models.Error
 		json.NewDecoder(r.Body).Decode(&user)
-		err := c.Validator.Struct(user)
+		validate := validator.New()
+		err := validate.Struct(user)
 		if err != nil {
-			error.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				error.Errors = append(error.Errors, fmt.Sprintf("%v", validationError))
+			}
+			error.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
@@ -59,9 +65,14 @@ func (c *Controller) Login() http.HandlerFunc {
 		var error models.Error
 
 		json.NewDecoder(r.Body).Decode(&user)
-		err := c.Validator.Struct(user)
+		validate := validator.New()
+		err := validate.Struct(user)
 		if err != nil {
-			error.Message = err.Error()
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				error.Errors = append(error.Errors, fmt.Sprintf("%v", validationError))
+			}
+			error.Message = "Invalid Request Payload"
 			utils.RespondWithError(w, http.StatusBadRequest, error)
 			return
 		}
