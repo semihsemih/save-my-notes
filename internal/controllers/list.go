@@ -60,8 +60,9 @@ func (c *Controller) InsertList() http.HandlerFunc {
 			return
 		}
 
-		if result := c.DB.Create(&list); result.Error != nil {
-			errorObject.Message = result.Error.Error()
+		err = c.DB.Create(&list).Error
+		if err != nil {
+			errorObject.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
 			return
 		}
@@ -83,8 +84,9 @@ func (c *Controller) GetList() http.HandlerFunc {
 		}
 		list.ID = uint(id)
 
-		if result := c.DB.Where("id = ?", list.ID).First(&list); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Where("id = ?", list.ID).First(&list).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}
@@ -125,8 +127,9 @@ func (c *Controller) UpdateList() http.HandlerFunc {
 			return
 		}
 
-		if result := c.DB.Model(&list).Updates(models.List{Title: list.Title, Description: list.Description}); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Model(&list).Updates(models.List{Title: list.Title, Description: list.Description}).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}
@@ -141,8 +144,9 @@ func (c *Controller) DeleteList() http.HandlerFunc {
 		vars := mux.Vars(r)
 		id := vars["id"]
 
-		if result := c.DB.Unscoped().Delete(&models.List{}, id); result.Error != nil {
-			error.Message = result.Error.Error()
+		err := c.DB.Unscoped().Delete(&models.List{}, id).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}

@@ -44,8 +44,9 @@ func (c *Controller) Signup() http.HandlerFunc {
 		user.Password = string(hash)
 		user.UUID = uuid.NewV4()
 
-		if result := c.DB.Create(&user); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Create(&user).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}
@@ -78,8 +79,9 @@ func (c *Controller) Login() http.HandlerFunc {
 		}
 
 		password := user.Password
-		if result := c.DB.Where("email = ?", user.Email).First(&user); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Where("email = ?", user.Email).First(&user).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}
@@ -126,8 +128,11 @@ func (c *Controller) AccountActivation() http.HandlerFunc {
 			uuid = fmt.Sprintf("%v", claims["uuid"])
 		}
 
-		if result := c.DB.Exec("UPDATE users SET status = @status, updated_at = @updated_at WHERE uuid = @uuid",
-			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("uuid", uuid)); result.Error != nil {
+		err = c.DB.Exec(
+			"UPDATE users SET status = @status, updated_at = @updated_at WHERE uuid = @uuid",
+			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("uuid", uuid),
+		).Error
+		if err != nil {
 			errorObject.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
 			return
@@ -150,8 +155,9 @@ func (c *Controller) GetUser() http.HandlerFunc {
 		}
 		user.ID = uint(id)
 
-		if result := c.DB.Where("id = ?", user.ID).First(&user); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Where("id = ?", user.ID).First(&user).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}

@@ -29,8 +29,9 @@ func (c *Controller) InsertNote() http.HandlerFunc {
 			return
 		}
 
-		if result := c.DB.Create(&note); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Create(&note).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}
@@ -52,8 +53,9 @@ func (c *Controller) GetNote() http.HandlerFunc {
 		}
 		note.ID = uint(id)
 
-		if result := c.DB.Where("id = ?", note.ID).First(&note); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Where("id = ?", note.ID).First(&note).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusNotFound, error)
 			return
 		}
@@ -88,8 +90,9 @@ func (c *Controller) UpdateNote() http.HandlerFunc {
 			return
 		}
 
-		if result := c.DB.Model(&note).Updates(models.Note{Title: note.Title, Content: note.Content}); result.Error != nil {
-			error.Message = result.Error.Error()
+		err = c.DB.Model(&note).Updates(models.Note{Title: note.Title, Content: note.Content}).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}
@@ -104,8 +107,9 @@ func (c *Controller) DeleteNote() http.HandlerFunc {
 		vars := mux.Vars(r)
 		id := vars["id"]
 
-		if result := c.DB.Unscoped().Delete(&models.Note{}, id); result.Error != nil {
-			error.Message = result.Error.Error()
+		err := c.DB.Unscoped().Delete(&models.Note{}, id).Error
+		if err != nil {
+			error.Message = err.Error()
 			utils.RespondWithError(w, http.StatusInternalServerError, error)
 			return
 		}
