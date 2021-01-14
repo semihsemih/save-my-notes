@@ -8,8 +8,8 @@ import (
 func Init(controller *controllers.Controller) *mux.Router {
 	router := mux.NewRouter()
 	/* User Action Routes */
-	router.HandleFunc("/api/user/signup", controller.Signup()).Methods("POST")
-	router.HandleFunc("/api/user/login", controller.Login()).Methods("POST")
+	router.HandleFunc("/api/auth/signup", controller.Signup()).Methods("POST")
+	router.HandleFunc("/api/auth/login", controller.Login()).Methods("POST")
 	router.HandleFunc("/api/user/activation/{token}", controller.AccountActivation()).Methods("GET")
 	router.HandleFunc("/api/user/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetUser())).Methods("GET")
 
