@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator"
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"github.com/semihsemih/save-my-notes/internal/services"
 	"github.com/semihsemih/save-my-notes/internal/utils"
@@ -11,6 +14,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 )
 
 func (c *Controller) Signup() http.HandlerFunc {
@@ -96,5 +101,42 @@ func (c *Controller) Login() http.HandlerFunc {
 		jwt.Token = token
 
 		utils.ResponseJSON(w, http.StatusOK, jwt)
+	}
+}
+
+func (c *Controller) AccountActivation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var errorObject models.Error
+		vars := mux.Vars(r)
+		activationToken := vars["token"]
+		var uuid string
+		token, err := jwt.Parse(activationToken, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("There was an error")
+			}
+
+			return []byte(os.Getenv("TOKEN_SECRET")), nil
+		})
+
+		if err != nil {
+			errorObject.Message = err.Error()
+			utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+			return
+		}
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			uuid = fmt.Sprintf("%v", claims["uuid"])
+		}
+
+		err = c.DB.Exec(
+			"UPDATE users SET status = @status, updated_at = @updated_at WHERE uuid = @uuid",
+			sql.Named("status", true), sql.Named("updated_at", time.Now()), sql.Named("uuid", uuid),
+		).Error
+		if err != nil {
+			errorObject.Message = err.Error()
+			utils.RespondWithError(w, http.StatusInternalServerError, errorObject)
+			return
+		}
+
+		utils.ResponseJSON(w, http.StatusOK, "Account activated")
 	}
 }
