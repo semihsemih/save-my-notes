@@ -7,24 +7,28 @@ import (
 
 func Init(controller *controllers.Controller) *mux.Router {
 	router := mux.NewRouter()
-	/* User Action Routes */
-	router.HandleFunc("/api/auth/signup", controller.Signup()).Methods("POST")
-	router.HandleFunc("/api/auth/login", controller.Login()).Methods("POST")
-	router.HandleFunc("/api/user/activation/{token}", controller.AccountActivation()).Methods("GET")
-	router.HandleFunc("/api/user/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetUser())).Methods("GET")
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	authRouter := router.PathPrefix("/auth").Subrouter()
 
+	/* Authentication Action Routes */
+	authRouter.HandleFunc("/signup", controller.Signup()).Methods("POST")
+	authRouter.HandleFunc("/login", controller.Login()).Methods("POST")
+	authRouter.HandleFunc("/activation/{token}", controller.AccountActivation()).Methods("GET")
+
+	/* User Action Routes */
+	apiRouter.HandleFunc("/user/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetUser())).Methods("GET")
 
 	/* List Action Routes */
-	router.HandleFunc("/api/list", controller.TokenVerifyMiddleware(controller.InsertList())).Methods("POST")
-	router.HandleFunc("/api/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetList())).Methods("GET")
-	router.HandleFunc("/api/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.UpdateList())).Methods("PUT")
-	router.HandleFunc("/api/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.DeleteList())).Methods("DELETE")
+	apiRouter.HandleFunc("/list", controller.TokenVerifyMiddleware(controller.InsertList())).Methods("POST")
+	apiRouter.HandleFunc("/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetList())).Methods("GET")
+	apiRouter.HandleFunc("/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.UpdateList())).Methods("PUT")
+	apiRouter.HandleFunc("/list/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.DeleteList())).Methods("DELETE")
 
 	/* Note Action Routes */
-	router.HandleFunc("/api/note", controller.TokenVerifyMiddleware(controller.InsertNote())).Methods("POST")
-	router.HandleFunc("/api/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetNote())).Methods("GET")
-	router.HandleFunc("/api/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.UpdateNote())).Methods("PUT")
-	router.HandleFunc("/api/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.DeleteNote())).Methods("DELETE")
+	apiRouter.HandleFunc("/note", controller.TokenVerifyMiddleware(controller.InsertNote())).Methods("POST")
+	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.GetNote())).Methods("GET")
+	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.UpdateNote())).Methods("PUT")
+	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.TokenVerifyMiddleware(controller.DeleteNote())).Methods("DELETE")
 
 	return router
 }
