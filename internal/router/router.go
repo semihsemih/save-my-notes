@@ -32,7 +32,11 @@ func Init(controller *controllers.Controller) *mux.Router {
 	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.UpdateNote()).Methods("PUT")
 	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.DeleteNote()).Methods("DELETE")
 
-	router.PathPrefix("/api").Handler(negroni.New(
+	commonMiddlewares := negroni.New(
+		negroni.HandlerFunc(middleware.CORS),
+	)
+
+	router.PathPrefix("/api").Handler(commonMiddlewares.With(
 		negroni.HandlerFunc(middleware.TokenVerifyMiddleware),
 		negroni.Wrap(apiRouter),
 	))

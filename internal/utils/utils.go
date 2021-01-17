@@ -12,7 +12,6 @@ import (
 
 func RespondWithError(w http.ResponseWriter, status int, err models.Error) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(err)
 }
@@ -20,7 +19,6 @@ func RespondWithError(w http.ResponseWriter, status int, err models.Error) {
 func ResponseJSON(w http.ResponseWriter, status int, data interface{}) {
 	response, _ := json.Marshal(data)
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	w.Write(response)
 }
