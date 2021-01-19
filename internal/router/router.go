@@ -9,8 +9,22 @@ import (
 
 func Init(controller *controllers.Controller) *mux.Router {
 	router := mux.NewRouter()
-	apiRouter := router.PathPrefix("/api").Subrouter()
+	apiBaseRouter := mux.NewRouter()
+
+	/* Subrouters */
+	apiRouter := apiBaseRouter.PathPrefix("/api").Subrouter()
 	authRouter := router.PathPrefix("/auth").Subrouter()
+
+	/* Router middlwares */
+	router.PathPrefix("/").Handler(negroni.New(
+		negroni.HandlerFunc(middleware.GzipMiddleware),
+		negroni.HandlerFunc(middleware.CORS),
+	))
+
+	router.PathPrefix("/api").Handler(negroni.New(
+		negroni.HandlerFunc(middleware.TokenVerifyMiddleware),
+		negroni.Wrap(router),
+	))
 
 	/* Authentication Action Routes */
 	authRouter.HandleFunc("/signup", controller.Signup()).Methods("POST")
@@ -31,15 +45,6 @@ func Init(controller *controllers.Controller) *mux.Router {
 	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.GetNote()).Methods("GET")
 	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.UpdateNote()).Methods("PUT")
 	apiRouter.HandleFunc("/note/{id:[0-9]+}", controller.DeleteNote()).Methods("DELETE")
-
-	commonMiddlewares := negroni.New(
-		negroni.HandlerFunc(middleware.CORS),
-	)
-
-	router.PathPrefix("/api").Handler(commonMiddlewares.With(
-		negroni.HandlerFunc(middleware.TokenVerifyMiddleware),
-		negroni.Wrap(apiRouter),
-	))
 
 	return router
 }
